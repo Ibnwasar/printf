@@ -1,42 +1,74 @@
 #include "main.h"
 
 /**
- * _printf - works like prinf
- * @format: the format string
- * Return: number of bytes printed or -1 on error
+ * _printf - Parameters for printf
+ * @format: list of arguments
+ * Return: Printed thing
  */
 
 int _printf(const char *format, ...)
-
 {
+	int chars;
+	va_list list;
 
-        int i, total = 0;
-        char c;
-        va_list args;
-        int (*print)(va_list *);
-        va_start(args, format);
+	va_start(list, format);
+	if (format == NULL)
+		return (-1);
 
-        if (!format)
+	chars = charsFormats(format, list);
 
-                return (0)
+	va_end(list);
+	return (chars);
+}
 
-        for (i = 0; format[i] != '\0'; i++)
-        {
-                if (format[i] == '%')
-                {
-                        i++;
-                        c = format[i];
-                        if (c == '%')
-                        {
-                                total += write(1, "%", 1);
-                                continue;
-                        }
-                        print = get_f(c);
-                        total += print(&args);
-                }
-                else
-                        total += write(1, &format[i], 1);
-        }
-        va_end(args);
-        return (total);
+/**
+ * charsFormats - paremters printf
+ * @format: list of arguments
+ * @args: listing
+ * Return: value of print
+ */
+
+int charsFormats(const char *format, va_list args)
+{
+	int a, b, chars, r_val;
+
+	fmtsSpefier f_list[] = {{"c", _char}, {"s", _string},
+				{"%", _percent}, {"d", _integer}, {"i", _integer}, {NULL, NULL}
+	};
+	chars = 0;
+	for (a = 0; format[a] != '\0'; a++)
+	{
+		if (format[a] == '%')
+		{
+			for (b = 0; f_list[b].sym != NULL; b++)
+			{
+				if (format[a + 1] == f_list[b].sym[0])
+				{
+					r_val = f_list[b].f(args);
+					if (r_val == -1)
+						return (-1);
+					chars += r_val;
+					break;
+				}
+			}
+			if (f_list[b].sym == NULL && format[a + 1] != ' ')
+			{
+				if (format[a + 1] != '\0')
+				{
+					_putchar(format[a]);
+					_putchar(format[a + 1]);
+					chars = chars + 2;
+}
+				else
+					return (-1);
+			}
+		a += 1;
+		}
+		else
+		{
+			_putchar(format[a]);
+			chars++;
+		}
+	}
+	return (chars);
 }
